@@ -1,0 +1,92 @@
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-7">
+
+<title>Google Checkout module for Rails</title>
+<meta name="keywords" content="google, checkout, rails, ruby, payment, module, integration, ecommerce, shop">
+</head><body>
+<h2>GCheckout module for Rails</h2>
+<h3>README</h3>
+Hi,
+
+<p>This is simple but working library for accepting Google Checkout Orders.<br>
+It can be easily integrated with any Rails application and what is even
+more important - can be easily improved to support features that I dont
+need at this moment. This code is a part of another project. I couldnt
+find completed solution when writing this so I decided to put the
+results online.
+</p><p>Details: 
+</p><ul>
+<li>sends digitally signed shopping carts (source code is cut to support USD only but it is easy to fix)</li>
+<li>autocharging orders</li>
+<li>saving and processing transactions via system of hooks</li>
+<li><b>shipping is not supported</b> as my main <a href="http://payplay.fm/">project</a> just sells music online. So "shippped" status is set automatically once the order is charged</li>
+</ul>
+
+<h3>INSTALL:</h3>
+
+<ol>
+<li>download <a href="http://rubyforge.org/frs/?group+AF8-id=3571">tarball</a></li>
+<li>copy files to corresponding places in your RAILS+AF8-ROOT- migration - to db/migrate, +ACo-.rb files to lib</li>
+<li>run <b>rake db:migrate</b> or manually run migration. It will create 2 tables: one for transactions, another one - for order statuses</li>
+<li>Ensure <b>'net/https'</b> library is also installed</li>
+<li><b>hmac-sha</b> library is required to digitally sign your shopping carts. On FreeBSD you can find it here: <i>/usr/ports/security/ruby-hmac</i></li>
+<li>Put <b>require lib/googlecheckout.rb</b> in the end of your config/environment.rb or whatever you use to include modules</li>
+
+<li>Put <b>include  CanAcceptGoogleCheckout</b> to your sort of payment
+controller. You need to define 3 constants (G+AF8-LIVE, G+AF8-MERCHANTID,
+G+AF8-MERCHANTKEY) like it is made in sample. Remember to keep key in
+secret. Now it should look like this: </li>
+<pre> +ACQ-Id: payment+AF8-controller.rb 8036 2006-12-25 10:19:44Z kelyar +ACQ-
+   
+   require "+ACMAew-RAILS+AF8-ROOT+AH0-/lib/can+AF8-accept+AF8-google+AF8-checkout.rb"
+   
+   class PaymentController +ACY-lt; ApplicationController
+   
+     G+AF8-MERCHANTID = "PUT+AF8-YOUR+AF8-ID+AF8-HERE"
+     G+AF8-MERCHANTKEY = "PUT+AF8-YOUR+AF8-KEY+AF8-HERE"
+     G+AF8-LIVE = false
+     include CanAcceptGoogleCheckout
+</pre>
+
+
+
+<li>Go to <a href="https://google.com/checkout/sell/settings?section=Integration">https://google.com/checkout/sell/settings?section=Integration</a>
+and enter API callback URL: it will be smth like
+"https://yourserver.com/YOURPAYMENTCONTROLLERHERE/g+AF8-checkout+AF8-callback",
+set "Callback method" to HTML and you can also set extra security flag
+to only post digitally signed XML shopping carts.<br> <i>This page also shows your Google Checkout Merchant Key in case you forgot</i></li>
+<li>now put all your business logic into <b>g+AF8-charge+AF8-amount+AF8-notification</b> method of your controller that is responsible for accepting online orders. See example.
+<pre>def g+AF8-charge+AF8-amount+AF8-notification(opts)
+    
+    tr = GcheckoutTransaction.find+AF8-by+AF8-order+AF8-number(opts["google-order-number"], :include =+ACY-gt; :user)
+    if tr +ACY-amp;+ACY-amp; tr.user
+      options = +AHs- :value =+ACY-gt; opts['total-charge-amount'],
+        :method=+ACY-gt;"gcheckout",
+        :data =+ACY-gt; tr[:order+AF8-number]
+      +AH0-
+      
+      begin
+        tr.user.credit+AF8-money(options) if tr.credited+AF8-at.nil? or tr.credited+AF8-at.to+AF8-i.zero?
+        tr.update+AF8-attribute(:credited+AF8-at, Time.now)
+      rescue
+      end
+      deliver(opts["google-order-number"]) +ACM- this will autoset "shipped" status
+    end
+  end
+</pre>
+</li>
+<li>Restart your webserver</li>
+<li>Check <i>g+AF8-server2server</i> and <i>status</i> method samples in payment controller
+</li></ol>
+You should also think about proper way to display transaction status
+for users that are returning from google's page. It is NOT as fast as
+paypal and you can not assume order is already charged when user clicks
+"return". We on payplay.fm made a dynamic page with ajax progress bar
+that shows transaction status: reviewing, charging, charged. See method
+action in sample payment controller called <i>status</i>.
+
+<h4>Author</h4>
+Here is the link to contact about gcheckout - <a href="http://rubyforge.org/users/kelyar/">http://rubyforge.org/users/kelyar/</a><br>
+http://workingwithrails.com/person/6232-evgeniy-kelyarsky
+This is <a href="http://www.linkedin.com/in/kelyar">Linkedin profile</a>
+</body></html>
