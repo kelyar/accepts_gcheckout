@@ -1,9 +1,11 @@
 Google Checkout module for Rails
+
 Hi,
 
-I wrote this code like 2 years ago when started using rails. Since than many things changed and I registered on github to clean up this library and learn new things like git and plugin generators. So I am going to rewrite this bunch of code and make a nice plugin because code is awful right now (altough it works).
+I wrote this code like 2 years ago when started using rails. Since than many things changed and I decided that it is a good chance to register on github to clean up this library and learn new things like git and plugin generators. So I am going to rewrite this bunch of code and make a nice plugin because code is awful right now (altough it works). Below is a old README file.
+--------
 
-This is simple but working library for accepting Google Checkout Orders.<br>
+This is simple but working library for accepting Google Checkout Orders.
 It can be easily integrated with any Rails application and what is even
 more important - can be easily improved to support features that I dont
 need at this moment. This code is a part of another project. I couldnt
@@ -20,52 +22,52 @@ INSTALL
 
 - copy files to corresponding places in your RAILS_ROOT- migrations - to db/migrate, *.rb files to lib
 run <b>rake db:migrate</b> or manually run migration. It will create 2 tables: one for transactions, another one - for order statuses
-Ensure <b>'net/https'</b> library is also installed
-<b>hmac-sha</b> library is required to digitally sign your shopping carts. On FreeBSD you can find it here: <i>/usr/ports/security/ruby-hmac</i>
-Put <b>require lib/googlecheckout.rb</b> in the end of your config/environment.rb or whatever you use to include modules
+Ensure 'net/https' library is also installed
+"hmac-sha" library is required to digitally sign your shopping carts. On FreeBSD you can find it in /usr/ports/security/ruby-hmac
+Put 
+  require "googlecheckout"a
+ in the end of your config/environment.rb or whatever you use to include modules
 
 Put <b>include  CanAcceptGoogleCheckout</b> to your sort of payment
-controller. You need to define 3 constants (G_LIVE, G_MERCHANTID,
-G_MERCHANTKEY) like it is made in sample. Remember to keep key in
-secret. Now it should look like this: 
+controller. You need to define 3 constants (G_LIVE, G_MERCHANTID, G_MERCHANTKEY) 
+like it is made in sample. Remember to keep key in secret. Now it should look like this: 
 
    require "#{RAILS_ROOT}/lib/can_accept_google_checkout.rb"
    
    class PaymentController < ApplicationController
    
-     G+AF8-MERCHANTID = "PUT+AF8-YOUR+AF8-ID+AF8-HERE"
-     G+AF8-MERCHANTKEY = "PUT+AF8-YOUR+AF8-KEY+AF8-HERE"
-     G+AF8-LIVE = true
+     G_MERCHANTID = "PUT_YOUR_ID_HERE"
+     G_MERCHANTKEY = "PUT_YOUR_KEY_HERE"
+     G_LIVE = true
      include CanAcceptGoogleCheckout
 
 
-Go to <a href="https://google.com/checkout/sell/settings?section=Integration">https://google.com/checkout/sell/settings?section=Integration</a>
-and enter API callback URL: it will be smth like
-"https://yourserver.com/YOURPAYMENTCONTROLLERHERE/g+AF8-checkout+AF8-callback",
+Go to https://google.com/checkout/sell/settings?section=Integration and enter API callback URL: it will be smth like "https://yourserver.com/YOURPAYMENTCONTROLLERHERE/g_checkout_callback",
 
 set "Callback method" to HTML and you can also set extra security flag
 to only post digitally signed XML shopping carts. This page also shows your Google Checkout Merchant Key in case you forgot
-- now put all your business logic into <b>g+AF8-charge+AF8-amount+AF8-notification</b> method of your controller that is responsible for accepting online orders. See example.
+- now put all your business logic into <b>g_charge_amount_notification</b> method of your controller that is responsible for accepting online orders. See example.
 
-def g+AF8-charge+AF8-amount+AF8-notification(opts)
+def g_charge_amount_notification(opts)
     
-    tr = GcheckoutTransaction.find+AF8-by+AF8-order+AF8-number(opts["google-order-number"], :include =+ACY-gt; :user)
-    if tr +ACY-amp;+ACY-amp; tr.user
-      options = +AHs- :value =+ACY-gt; opts['total-charge-amount'],
-        :method=+ACY-gt;"gcheckout",
-        :data =+ACY-gt; tr[:order+AF8-number]
-      +AH0-
+    tr = GcheckoutTransaction.find_by_order_number(opts["google-order-number"],:include=>:user)
+    if tr && tr.user
+      options = { :value => opts['total-charge-amount'],
+        :method=>"gcheckout",
+        :data => tr[:order_number]
+      }
       
       begin
-        tr.user.credit+AF8-money(options) if tr.credited+AF8-at.nil? or tr.credited+AF8-at.to+AF8-i.zero?
-        tr.update+AF8-attribute(:credited+AF8-at, Time.now)
+        tr.user.credit_money(options) if tr.credited_at.nil? or tr.credited_at.to_i.zero?
+        tr.update_attribute(:credited_at, Time.now)
       rescue
       end
-      deliver(opts["google-order-number"]) +ACM- this will autoset "shipped" status
+      deliver(opts["google-order-number"]) # this will autoset "shipped" status
     end
   end
+
 Restart your webserver
-Check <i>g+AF8-server2server</i> and <i>status</i> method samples in payment controller
+Check :g_server2server and :status method samples in payment controller
 
 You should also think about proper way to display transaction status
 for users that are returning from google's page. It is NOT as fast as
