@@ -1,11 +1,14 @@
 class GcheckoutOrderState < ActiveRecord::Base
+
   def to_s
-    self.title
+    "#{title}"
   end
+
   def chargeable?
-    self.title.eql?("CHARGEABLE")
+    title.eql?("CHARGEABLE")
   end
+
   def charged?
-    self.title.eql?("CHARGED")
+    title.eql?("CHARGED")
   end
 end

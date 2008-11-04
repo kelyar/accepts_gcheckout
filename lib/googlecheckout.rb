@@ -18,7 +18,7 @@ module ELRO
         "https://sandbox.google.com/checkout/buttons/checkout.gif?merchant_id=#{@merchant_id}"
       @button_src << "&style=white&w=180&h=46&variant=text&loc=en_US"
       # FIXME
-      @continue_url = "https://payplay.fm/payment/status"
+      @continue_url = "https://localhost:3000/payment/status"
     end
 
     def additem(name,description,price,custom_item_id)

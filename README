@@ -3,6 +3,11 @@ Google Checkout module for Rails
 Hi,
 
 I wrote this code like 2 years ago when started using rails. Since than many things changed and I decided that it is a good chance to register on github to clean up this library and learn new things like git and plugin generators. So I am going to rewrite this bunch of code and make a nice plugin because code is awful right now (altough it works). Below is a old README file.
+
+TODO:
+- remove hardcoded things
+- generate migrations and controllers/models with rake
+- TESTS!!!
 --------
 
 This is simple but working library for accepting Google Checkout Orders.

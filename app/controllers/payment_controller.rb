@@ -58,7 +58,7 @@ class PaymentController < ApplicationController
   def g_server2server
     sum = params[:info][:amount].to_f rescue 5.0
     cart = ELRO::GoogleCheckout::SimpleCart.new(G_MERCHANTID, G_MERCHANTKEY)
-    cart.additem("Add money", "Add money to your PayPlay.FM Account (#{User.current_user.email})", 
+    cart.additem("Add money", "Add money to your account (#{User.current_user.email})", 
       sum, User.current_user.id)
     @decoded_cart = cart.draw_decoded_cart
     checkout(@decoded_cart)
@@ -71,23 +71,12 @@ class PaymentController < ApplicationController
       options = { :value => opts['total-charge-amount'], 
         :method=>"gcheckout",
         :data => tr[:order_number],   
-        :x_forwarded_for=> request.remote_ip  # fucking funny - it's google ip
+        :x_forwarded_for=> request.remote_ip  # useless - it's google ip
       }
 
-      unless tr.user.dotcom_user_id.to_i.zero?
-        begin
-          tr.user.credit_money(options) if tr.credited_at.nil? or tr.credited_at.to_i.zero?
-          tr.update_attribute(:credited_at, Time.now)
-        rescue
-        end
-        deliver(opts["google-order-number"])
-      else
-        Notifier.deliver_admin_msg(%w(kelyar@ua.elro.com), 
-          "gcheckout-notifier@payplay.fm",  
-          "GoogleCheckout: warning: empty uid",   
-          opts.inspect
-        )
-      end
+      tr.user.credit_money(options) if tr.credited_at.nil? or tr.credited_at.to_i.zero?
+      tr.update_attribute(:credited_at, Time.now)
+      deliver(opts["google-order-number"])
     end
   end
 

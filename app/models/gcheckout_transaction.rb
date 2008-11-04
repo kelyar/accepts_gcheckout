@@ -5,12 +5,15 @@ class GcheckoutTransaction < ActiveRecord::Base
 
   after_save :notify_admin
 
+  TO = %{test@example.com}
+  FROM = %w{test@example.com}
+
   def notify_admin
     Notifier.deliver_admin_msg(
-      %w{kelyar@ua.elro.com},
-      "gcheckout-notifier@payplay.fm", 
-      "GCheckout transaction: #{self.order_total}",
-      "#{self.order_number}: #{self.buyer_billing_email} (#{self.user_id}) just credited #{self.order_total} #{self.currency}"
-    ) if self.financial_state.charged? && self.credited_at.nil?
+      TO,
+      FROM, 
+      "GCheckout transaction: #{order_total}",
+      "#{order_number}: #{buyer_billing_email} (#{user_id}): +#{order_total} #{currency}"
+    ) if financial_state.charged? && credited_at.nil?
   end
 end

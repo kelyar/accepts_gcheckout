@@ -19,14 +19,6 @@ module CanAcceptGoogleCheckout
   def g_checkout_callback
     self.process_google_request(params)
 
-=begin
-    Notifier.deliver_admin_msg(
-      %w{kelyar@ua.elro.com},
-      "gcheckout-notifier@payplay.fm", 
-      "Google Checkout: notification",
-      params.inspect
-    )
-=end
     headers["Content-type"] = "text/xml"
     render :text=>'<?xml version="1.0" encoding="UTF-8"?><notification-acknowledgment xmlns="http://checkout.google.com/schema/2"/>'
   end  
